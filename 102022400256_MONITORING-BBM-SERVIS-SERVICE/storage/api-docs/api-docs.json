@@ -1,0 +1,147 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Monitoring BBM Servis Service API",
+        "description": "Dokumentasi API untuk Service Monitoring BBM/Servis",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Local Server"
+        }
+    ],
+    "paths": {
+        "/api/v1/maintenance": {
+            "get": {
+                "tags": [
+                    "Maintenance"
+                ],
+                "summary": "Get all maintenance data",
+                "operationId": "15fd701e2941db52427fdd58d5603119",
+                "responses": {
+                    "200": {
+                        "description": "Data retrieved successfully"
+                    },
+                    "401": {
+                        "description": "Invalid API Key"
+                    }
+                },
+                "security": [
+                    {
+                        "IAEApiKey": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Maintenance"
+                ],
+                "summary": "Create maintenance data",
+                "operationId": "1a3d3dc32adaaf98644566cbe1f7fd4a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "vehicle_id",
+                                    "fuel_limit",
+                                    "last_service_date"
+                                ],
+                                "properties": {
+                                    "vehicle_id": {
+                                        "type": "string",
+                                        "example": "K001"
+                                    },
+                                    "fuel_limit": {
+                                        "type": "number",
+                                        "example": 500000
+                                    },
+                                    "last_service_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-06-08"
+                                    },
+                                    "operational_coupon": {
+                                        "type": "string",
+                                        "example": "CPN001"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Servis rutin dan pengecekan BBM"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Maintenance data created successfully"
+                    },
+                    "401": {
+                        "description": "Invalid API Key"
+                    }
+                },
+                "security": [
+                    {
+                        "IAEApiKey": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/maintenance/{id}": {
+            "get": {
+                "tags": [
+                    "Maintenance"
+                ],
+                "summary": "Get maintenance by ID",
+                "operationId": "6b3c760934ae00d58d40fbc3d62dcf8e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Maintenance ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    },
+                    "401": {
+                        "description": "Invalid API Key"
+                    }
+                },
+                "security": [
+                    {
+                        "IAEApiKey": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "IAEApiKey": {
+                "type": "apiKey",
+                "name": "X-IAE-KEY",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Maintenance",
+            "description": "Maintenance"
+        }
+    ]
+}

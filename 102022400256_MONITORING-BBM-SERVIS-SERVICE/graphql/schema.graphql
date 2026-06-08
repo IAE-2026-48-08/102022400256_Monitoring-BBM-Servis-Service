@@ -1,0 +1,15 @@
+type Maintenance {
+    id: ID!
+    vehicle_id: String!
+    fuel_limit: Float!
+    last_service_date: String
+    operational_coupon: String
+    notes: String
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+type Query {
+    maintenances: [Maintenance!]! @all(model: "App\\Models\\Maintenance")
+    maintenance(id: ID! @eq): Maintenance @find(model: "App\\Models\\Maintenance")
+}

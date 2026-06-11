@@ -10,7 +10,7 @@ use OpenApi\Attributes as OA;
     description: "Dokumentasi API untuk Service Monitoring BBM/Servis"
 )]
 #[OA\Server(
-    url: "http://127.0.0.1:8000",
+    url: "http://localhost:8003",
     description: "Local Server"
 )]
 #[OA\SecurityScheme(

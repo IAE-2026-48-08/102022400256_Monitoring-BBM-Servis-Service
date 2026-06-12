@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Maintenance;
+use Illuminate\Support\Facades\Http;
 use OpenApi\Attributes as OA;
 
 class MaintenanceController extends Controller
@@ -102,10 +103,64 @@ class MaintenanceController extends Controller
             'notes' => $request->notes,
         ]);
 
+        $m2mToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImlhZS1jZW50cmFsLTIwMjYifQ.eyJpc3MiOiJpYWUtY2VudHJhbC1tb2NrIiwic3ViIjoiS0VZLU1IUy0zNDIiLCJpYXQiOjE3ODEyNzc0MTUsImV4cCI6MTc4MTI4MTAxNSwiZ3JhbnRfdHlwZSI6ImNsaWVudF9jcmVkZW50aWFscyIsInRva2VuX3R5cGUiOiJtMm0iLCJhcHAiOnsiY2xpZW50X2lkIjoiS0VZLU1IUy0zNDIiLCJuYW1lIjoiTGFyYXZlbCBTZXJ2aWNlIFx1MjAxNCBHcm91cCA3ICgxMDIwMjI0MDAyNTYpIiwidGVhbSI6IlRFQU0tMDcifX0.HroG4w9VEoU3H7-OAY103QDePgMcOSJxAOop60daHVvCyWoGGXhcSSxAQ863jlRVMm5Y-WMMwUhalxs27GSLV8qwH2969Zd7o_LBJaRzGsINpO94yyizGQIpzQs27zh_E8ZbbeLdn9QL-GXMQC0zmPIZ-z5epzgc3vMsQvdNKrL7GscMzgB0HU0DhMI6sUZBtPLsx_x_ZRR1nlEt1lBi0EAHIz8GvmhuWe_X0puzMxcwuJKJ_tebGHL21Y9c3Fj4d2sg1tzdfb6mrlDrri_bWfSubzUgsVCnF-Em3sf78yhiIZudjv7qMn-Lpzq7ZFk0S_FZAkvdfcrtEhWNo4fG_w';
+
+        $xmlBody = <<<XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:iae="http://iae.central/audit">
+            <soap:Body>
+                <iae:AuditRequest>
+                    <iae:TeamID>TEAM-07</iae:TeamID>
+                    <iae:ActivityName>MaintenanceCreated</iae:ActivityName>
+                    <iae:LogContent><![CDATA[
+        {
+            "vehicle_id":"{$maintenance->vehicle_id}",
+            "fuel_limit":"{$maintenance->fuel_limit}",
+            "last_service_date":"{$maintenance->last_service_date}"
+        }
+                    ]]></iae:LogContent>
+                </iae:AuditRequest>
+            </soap:Body>
+        </soap:Envelope>
+        XML;
+
+        $soapResponse = Http::withToken($m2mToken)
+            ->withHeaders([
+                'Content-Type' => 'text/xml'
+            ])
+            ->send('POST',
+                'https://iae-sso.virtualfri.id/soap/v1/audit',
+                [
+                    'body' => $xmlBody
+                ]
+            );
+        
+        $rabbitResponse = Http::withToken($m2mToken)
+        ->withHeaders([
+            'Content-Type' => 'application/json'
+        ])
+        ->post('https://iae-sso.virtualfri.id/api/v1/messages/publish', [
+            'exchange' => 'iae.central.exchange',
+            'routing_key' => 'maintenance.created',
+            'payload' => [
+                'event_name' => 'maintenance.created',
+                'service_name' => 'Monitoring BBM Servis',
+                'team' => 'TEAM-07',
+                'vehicle_id' => $maintenance->vehicle_id,
+                'fuel_limit' => $maintenance->fuel_limit,
+                'last_service_date' => $maintenance->last_service_date,
+                'operational_coupon' => $maintenance->operational_coupon,
+            ]
+        ]);
+        
         return response()->json([
             'status' => 'success',
             'message' => 'Maintenance data created successfully',
-            'data' => $maintenance
+            'data' => $maintenance,
+            'integration' => [
+            'soap_status' => $soapResponse->status(),
+            'rabbitmq_status' => $rabbitResponse->status()
+            ]
         ], 201);
     }
 }

@@ -1,3 +1,5 @@
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
 type Maintenance {
     id: ID!
     vehicle_id: String!

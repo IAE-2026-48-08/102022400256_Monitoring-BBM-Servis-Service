@@ -27,7 +27,11 @@ class MaintenanceController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Data retrieved successfully',
-            'data' => $data
+            'data' => $data,
+            'meta' => [
+                'service_name' => 'Monitoring BBM Servis Service',
+                'api_version' => 'v1'
+            ]
         ]);
     }
 
@@ -66,7 +70,11 @@ class MaintenanceController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Data retrieved successfully',
-            'data' => $data
+            'data' => $data,
+            'meta' => [
+                'service_name' => 'Monitoring BBM Servis Service',
+                'api_version' => 'v1'
+            ]
         ]);
     }
 
@@ -157,9 +165,13 @@ class MaintenanceController extends Controller
             'status' => 'success',
             'message' => 'Maintenance data created successfully',
             'data' => $maintenance,
+            'meta' => [
+                'service_name' => 'Monitoring BBM Servis Service',
+                'api_version' => 'v1'
+            ],
             'integration' => [
-            'soap_status' => $soapResponse->status(),
-            'rabbitmq_status' => $rabbitResponse->status()
+                'soap_status' => $soapResponse->status(),
+                'rabbitmq_status' => $rabbitResponse->status()
             ]
         ], 201);
     }
